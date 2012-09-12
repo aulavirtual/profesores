@@ -24,6 +24,7 @@ import sys
 import gtk
 import api
 import widgets
+import homeworks
 
 from widgets import GROUPS
 
@@ -52,6 +53,7 @@ class Window(gtk.Window):
         notebook = gtk.Notebook()
         self.add(notebook)
 
+        # Documents canvas
         main_container = gtk.VBox()
         main_container.set_border_width(10)
         notebook.append_page(main_container, gtk.Label('Documentos'))
@@ -86,6 +88,10 @@ class Window(gtk.Window):
         self.sftp = api.connect_to_server()
 
         main_container.show_all()
+
+        # HomeWorks canvas
+        hwcanvas = homeworks.Canvas(self.sftp)
+        notebook.append_page(hwcanvas, gtk.Label('Tareas domiciliarias'))
 
         notebook.show_all()
         notebook.set_current_page(0)
