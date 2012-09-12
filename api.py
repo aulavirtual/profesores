@@ -32,11 +32,10 @@ import json
 OPEN_COMMAND = 'xdg-open %s' if 'linux' in sys.platform else '%s'
 
 SERVER = '192.168.1.100'
-USERNAME = 'antipapel'
+USERNAME = 'profesores'
 PASSWORD = 'sinpapeles'
 GROUPS_DIR = '/home/servidor/Groups'
 HOMEWORKS_DIR = '.homeworks'
-LOCAL_HW_DIR = 'Tareas domiciliarias'
 
 
 def _get_config():
