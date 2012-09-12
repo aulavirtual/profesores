@@ -23,13 +23,7 @@
 import pango
 import gobject
 import gtk
-
-try:
-    import api
-    DEBUG = False
-
-except ImportError:
-    DEBUG = True
+import api
 
 GROUPS = ('1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B')
 
@@ -86,13 +80,7 @@ class HomeWorksList(gtk.TreeView):
 
     def refresh(self):
         self._model.clear()
-        if not DEBUG:
-            self._hwlist = api.get_homeworks(self._sftp, self.group)
-        else:
-            self._hwlist = {'Practico Factoriales': (
-        '12/03/2045', 'Me quedo genial', '12|Excelente', 'Juanito Alcachofa'),
-        'Bigrafia': (
-        '12/03/2045', '-', '1|Muy mal', 'Maria Verde')}
+        self._hwlist = api.get_homeworks(self._sftp, self.group)
 
         keys = self._hwlist.keys()
         keys.sort()
@@ -206,7 +194,7 @@ class HomeWorkView(gtk.VBox):
         number = self.evaluation_n.get_text()
         textbuffer = self.evaluation_t.get_buffer()
         text = textbuffer.get_text(textbuffer.get_start_iter(),
-                                   textbuffer.get_end_iter())
+                                   textbuffer.get_end_iter(), True)
         title = self.title_label.get_text()
 
         if title:
@@ -266,10 +254,10 @@ class FileChooser(gtk.FileChooserDialog):
 
 class Canvas(gtk.VBox):
 
-    def __init__(self):
+    def __init__(self, sftp=None):
         super(Canvas, self).__init__()
 
-        self.sftp = api.connect_to_server()
+        self.sftp = sftp
 
         notebook = gtk.Notebook()
         notebook.set_show_tabs(False)
@@ -339,6 +327,7 @@ class Canvas(gtk.VBox):
             if homework:
                 api.evaluate_homework(self.sftp, self._homeworks_list.group,
                                       homework, evaluation)
+                self._homework_list.refresh()
 
     def _group_changed(self, widget):
         self._homeworks_list.group = widget.get_active_text()
@@ -348,6 +337,6 @@ class Canvas(gtk.VBox):
 if __name__ == '__main__':
     window = gtk.Window()
     window.resize(400, 300)
-    window.add(Canvas())
+    window.add(Canvas(api.connect_to_server()))
     window.show_all()
     gtk.main()

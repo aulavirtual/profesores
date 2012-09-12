@@ -23,15 +23,12 @@ import os
 import sys
 import gtk
 import api
-import json
-import magic
-import shutil
 import widgets
 
-
-from widgets import GROUPS, SUBJECTS
+from widgets import GROUPS
 
 GROUPS_DIR = os.path.join('/home/servidor', 'Groups')
+
 
 class Window(gtk.Window):
 
@@ -100,15 +97,13 @@ class Window(gtk.Window):
     def save_cb(self, widget):
         title = self._title.get_text()
 
-        buffer = self._description.get_buffer()
-        start = buffer.get_start_iter()
-        end = buffer.get_end_iter()
-        description = buffer.get_text(start, end, True)
+        _buffer = self._description.get_buffer()
+        start = _buffer.get_start_iter()
+        end = _buffer.get_end_iter()
+        description = _buffer.get_text(start, end, True)
 
         group_id = self._groups_selector.get_active()
         group = GROUPS[group_id]
-
-        subject = api.SUBJECT
 
         if group_id == 0:
             dialog = gtk.MessageDialog(type=gtk.MESSAGE_ERROR)
@@ -119,14 +114,13 @@ class Window(gtk.Window):
             dialog.destroy()
 
         else:
-            save_dir = os.path.join(GROUPS_DIR, group, subject)
-
             api.save_document(self.sftp, self._path, group, title, description)
 
             # Question:
             dialog = gtk.MessageDialog(type=gtk.MESSAGE_QUESTION)
             dialog.set_markup('<b>%s</b>' % '¡Documento guardado!')
-            dialog.format_secondary_text('¿Desea enviar el mismo documento a más grupos?')
+            dialog.format_secondary_text(
+                               '¿Desea enviar el mismo documento a más grupos?')
             dialog.add_buttons(gtk.STOCK_YES, gtk.RESPONSE_YES, gtk.STOCK_NO,
                                gtk.RESPONSE_NO)
             response = dialog.run()
