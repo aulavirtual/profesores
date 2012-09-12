@@ -21,12 +21,14 @@
 
 import gtk
 import pango
-import os
 
 GROUPS = ("Seleccione un grupo", "1A", "1B", "1C", "2A", "2B", "2C", "3A", "3B")
-SUBJECTS = ("Seleccione su materia", "Matematica", "Fisica", "Quimica", "Idioma Español", "Literatura", "Ingles", "Tecnologia", "F. Ciudadana","O. Vocacional", "Geografia", "Historia", "Dibujo", "Biologia", "Ed. Fisica", "Sexualidad",
-"Informatica", "Cs. Fisicas", "TOC Administracion", "TOC Madera", "TOC Mecanica", "TOC Arte", "TOC Alimentacion", 
-"TOC Electrotecnia", "TOC Tics")
+SUBJECTS = ("Seleccione su materia", "Matematica", "Fisica", "Quimica",
+            "Idioma Español", "Literatura", "Ingles", "Tecnologia",
+            "F. Ciudadana", "O. Vocacional", "Geografia", "Historia", "Dibujo",
+            "Biologia", "Ed. Fisica", "Sexualidad", "Informatica",
+            "Cs. Fisicas", "TOC Administracion", "TOC Madera", "TOC Mecanica",
+            "TOC Arte", "TOC Alimentacion", "TOC Electrotecnia", "TOC Tics")
 
 
 class Combo(gtk.ComboBox):
@@ -49,6 +51,7 @@ class GroupChooser(Combo):
             self.liststore.append([group])
 
         self.set_active(0)
+
 
 class Entry(gtk.Entry):
 
@@ -76,20 +79,20 @@ class Entry(gtk.Entry):
 
 
 class FileChooser(gtk.FileChooserDialog):
-    
+
     def __init__(self, parent):
-        gtk.FileChooserDialog.__init__(self, 
+        gtk.FileChooserDialog.__init__(self,
                                        "Seleccione un archivo",
                                        None,
                                        gtk.FILE_CHOOSER_ACTION_OPEN,
                                        (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
                                         gtk.STOCK_OPEN, gtk.RESPONSE_OK))
-        
+
         self.set_default_response(gtk.RESPONSE_OK)
 
         response = self.run()
         if response == gtk.RESPONSE_OK:
-             file = self.get_filename()           
-             parent.set_file(file)
-        
+            _file = self.get_filename()
+            parent.set_file(_file)
+
         self.destroy()

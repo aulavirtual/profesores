@@ -22,6 +22,8 @@
 import os
 import sys
 import gtk
+import pango
+
 import api
 import widgets
 import homeworks
@@ -42,6 +44,8 @@ class Window(gtk.Window):
         self.connect('destroy', self.exit)
 
         self._path = None
+        self._name = ''
+        self._last_name = ''
 
         self.show_all()
 
@@ -95,6 +99,74 @@ class Window(gtk.Window):
 
         notebook.show_all()
         notebook.set_current_page(0)
+
+    def _sign_up(self):
+        vbox = gtk.VBox()
+        vbox.set_border_width(20)
+
+        title = gtk.Label('Registrate en Aula Virtual')
+        title.modify_font(pango.FontDescription('bold 18'))
+        vbox.pack_start(title, False, padding=40)
+
+        note = gtk.Label('<span foreground="#FF0000"><i>\
+                      * Por favor ingresa los datos correctamente.</i></span>')
+        note.set_use_markup(True)
+        vbox.pack_start(note, False, True, padding=5)
+
+        hbox = gtk.HBox()
+        vbox.pack_start(hbox, False, padding=10)
+
+        label = gtk.Label("Nombre: ")
+        hbox.pack_start(label, False, padding=10)
+
+        entry = gtk.Entry()
+        entry.connect('changed', self._set_text)
+        hbox.pack_start(entry, True, padding=0)
+
+        hbox1 = gtk.HBox()
+        hbox1.set_border_width(20)
+
+        label = gtk.Label("Apellido:  ")
+        hbox1.pack_start(label, False, padding=0)
+
+        entry = gtk.Entry()
+        entry.connect('changed', self._set_text, False)
+        hbox1.pack_start(entry, True, padding=0)
+
+        vbox.pack_start(hbox1, False, padding=10)
+
+        hbox2 = gtk.HBox()
+        vbox.pack_start(hbox2, False, padding=10)
+
+        label_combo = gtk.Label("Elige tu grupo: ")
+        hbox2.pack_start(label_combo, False, True, padding=10)
+
+        combo = gtk.ComboBox()
+        liststore = gtk.ListStore(str)
+        combo.set_model(liststore)
+        cell = gtk.CellRendererText()
+        combo.pack_start(cell, True)
+        combo.add_attribute(cell, 'text', 0)
+        hbox2.pack_start(combo, False, True, padding=10)
+
+        for group in GROUPS:
+            liststore.append([group])
+        combo.set_active(0)
+
+        accept = gtk.Button('Aceptar')
+        accept.connect('clicked', self._accept_clicked, combo, entry, vbox)
+        box = gtk.HBox()
+        box.pack_end(accept, False)
+        vbox.pack_start(box, False)
+
+        self._canvas.add(vbox)
+        self.show_all()
+
+    def _set_text(self, widget, name=True):
+        if name:
+            self._name = widget.get_text()
+        else:
+            self._last_name = widget.get_text()
 
     def set_file(self, path):
         self._path = path
