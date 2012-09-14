@@ -33,7 +33,7 @@ OPEN_COMMAND = 'xdg-open %s' if 'linux' in sys.platform else '%s'
 
 SERVER = '192.168.1.100'
 USERNAME = 'profesores'
-PASSWORD = 'sinpapeles'
+RSAKEY = os.path.join(os.getenv('HOME'), '.ssh', 'id_rsa')
 GROUPS_DIR = '/home/servidor/Groups'
 HOMEWORKS_DIR = '.homeworks'
 
@@ -48,10 +48,24 @@ def _get_config():
 SUBJECT, NAME = _get_config()
 
 
+def generate_rsa_key():
+    stdout_file = tempfile.mktemp()
+    p = subprocess.Popen('ssh-keygen',
+                          shell=True,
+                          stdin=subprocess.PIPE,
+                          stdout=open(stdout_file, 'w+b'),
+                          stderr=open(stdout_file, 'r+b'),
+                          universal_newlines=False)
+    for i in range(3):
+        p.stdin.write('')
+        p.stdin.flush()
+
+
 def connect_to_server():
     """Connects to sftp server"""
     transport = paramiko.Transport((SERVER, 22))
-    transport.connect(username=USERNAME, password=PASSWORD)
+    rsakey = paramiko.RSAKey.from_private_key_file(RSAKEY, password='')
+    transport.connect(username=USERNAME, pkey=rsakey)
 
     sftp = paramiko.SFTPClient.from_transport(transport)
 
