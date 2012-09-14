@@ -92,13 +92,15 @@ def get_homeworks(sftp, group):
     return homeworks
 
 
-def get_homework(sftp, group, hw, uri=None, _open=True):
+def get_homework(sftp, group, hw, extension, uri=None, _open=True):
     sftp.chdir(os.path.join(GROUPS_DIR, group, SUBJECT, HOMEWORKS_DIR))
 
     if not uri:
         file_path = tempfile.mktemp()
     else:
         file_path = uri
+    if not extension in file_path:
+        file_path += extension
     sftp.get(hw, file_path)
 
     if _open:
@@ -112,8 +114,8 @@ def evaluate_homework(sftp, group, hw, evaluation):
     _desc = sftp.open('.desc', 'r')
     desc = json.load(_desc)
     _desc.close()
-    date, comments, student, s_evaluation = desc[hw]
-    desc[hw] = (date, comments, student, evaluation)
+    date, comments, s_evaluation, student, mimetype, extension = desc[hw]
+    desc[hw] = (date, comments, evaluation, student, mimetype, extension)
 
     _desc = sftp.open('.desc', 'w')
     json.dump(desc, _desc)

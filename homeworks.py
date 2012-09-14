@@ -85,24 +85,31 @@ class HomeWorksList(gtk.TreeView):
         keys = self._hwlist.keys()
         keys.sort()
         for hw in keys:
-            date, comments, evaluation, student = self._hwlist[hw]
-            evaluation = evaluation.split('|')[0]
+            date, comments, evaluation, student, mimetype, extension =\
+                                                                self._hwlist[hw]
+            try:
+                evaluation = evaluation.split('|')[0]
+            except:
+                evaluation = 'No evaluado'
             self._model.append([date, hw, evaluation, student])
 
     def _double_click(self, widget, treepath, column):
         keys = self._hwlist.keys()
         keys.sort()
         homework = keys[treepath[0]]
-        date, comment, evaluation, student = self._hwlist[homework]
+        date, comments, evaluation, student, mimetype, extension =\
+                                                          self._hwlist[homework]
         self._hwview.set_data(homework,
-                              comment,
+                              comments,
                               evaluation,
                               student,
                               self.group)
         self._notebook.set_current_page(1)
 
     def _open_homework(self, widget, homework):
-        api.get_homework(self._sftp, self.group, homework, None, True)
+        extension = self._hwlist[homework][-1]
+        api.get_homework(self._sftp, self.group, homework, extension,
+                         None, True)
 
     def _save_homework(self, widget, homework):
         f = FileChooser()
@@ -186,7 +193,10 @@ class HomeWorkView(gtk.VBox):
         self.title_label.set_markup(title_markup)
         self.desc_label.set_markup('<i>%s</i>' % comments)
         self.student_label.set_markup('<b>%s</b>' % (student))
-        number, text = evaluation.split('|', 2)
+        try:
+            number, text = evaluation.split('|', 2)
+        except:
+            number, text = 'No evaluado', 'No evaluado'
         self.evaluation_n.set_text(number)
         self.evaluation_t.get_buffer().set_text(text)
 
@@ -327,7 +337,7 @@ class Canvas(gtk.VBox):
             if homework:
                 api.evaluate_homework(self.sftp, self._homeworks_list.group,
                                       homework, evaluation)
-                self._homework_list.refresh()
+                self._homeworks_list.refresh()
 
     def _group_changed(self, widget):
         self._homeworks_list.group = widget.get_active_text()
