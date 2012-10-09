@@ -32,7 +32,7 @@ SUBJECTS = ("Seleccione su materia", "Matematica", "Fisica", "Quimica",
 
 
 class Combo(gtk.ComboBox):
-
+    '''Lista desplegable'''''
     def __init__(self):
         self.liststore = gtk.ListStore(str)
         gtk.ComboBox.__init__(self, self.liststore)
@@ -43,7 +43,7 @@ class Combo(gtk.ComboBox):
 
 
 class GroupChooser(Combo):
-
+    '''Lista desplegable con los grupos'''
     def __init__(self):
         Combo.__init__(self)
 
@@ -54,7 +54,7 @@ class GroupChooser(Combo):
 
 
 class Entry(gtk.Entry):
-
+    '''Entrada dee texto'''
     def __init__(self, text):
         gtk.Entry.__init__(self, max=0)
 
@@ -79,7 +79,7 @@ class Entry(gtk.Entry):
 
 
 class FileChooser(gtk.FileChooserDialog):
-
+    '''Selector de archivos'''
     def __init__(self, parent):
         gtk.FileChooserDialog.__init__(self,
                                        "Seleccione un archivo",

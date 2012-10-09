@@ -34,7 +34,7 @@ GROUPS_DIR = os.path.join('/home/servidor', 'Groups')
 
 
 class Window(gtk.Window):
-
+    '''Ventada de la interfas'''
     def __init__(self):
         gtk.Window.__init__(self)
 
@@ -54,6 +54,7 @@ class Window(gtk.Window):
         sys.exit(0)
 
     def _do_gui(self):
+        '''Arba la interfas grafica de usuario'''
         notebook = gtk.Notebook()
         self.add(notebook)
 
@@ -101,6 +102,7 @@ class Window(gtk.Window):
         notebook.set_current_page(0)
 
     def _sign_up(self):
+        '''Registrarse en el servidor'''
         vbox = gtk.VBox()
         vbox.set_border_width(20)
 

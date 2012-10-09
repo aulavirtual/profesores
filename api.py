@@ -39,6 +39,7 @@ HOMEWORKS_DIR = '.homeworks'
 
 
 def _get_config():
+    '''Devuelve el contenido del archivo config'''
     _file = open('config')
     data = json.load(_file)
     _file.close()
@@ -49,6 +50,7 @@ SUBJECT, NAME = _get_config()
 
 
 def generate_rsa_key():
+    '''Genera la clave ssh'''
     stdout_file = tempfile.mktemp()
     p = subprocess.Popen('ssh-keygen',
                           shell=True,
@@ -95,6 +97,7 @@ def save_document(sftp, uri, group, title, description):
 
 
 def get_homeworks(sftp, group):
+    '''Devuelve la lista de las tareeas domiciliarias'''
     sftp.chdir(os.path.join(GROUPS_DIR, group, SUBJECT, HOMEWORKS_DIR))
     _desc = sftp.open('.desc', 'r')
     desc = json.load(_desc)
@@ -107,6 +110,7 @@ def get_homeworks(sftp, group):
 
 
 def get_homework(sftp, group, hw, extension, uri=None, _open=True):
+    '''Devuelve una tarea domiciliaria'''
     sftp.chdir(os.path.join(GROUPS_DIR, group, SUBJECT, HOMEWORKS_DIR))
 
     if not uri:
@@ -124,6 +128,7 @@ def get_homework(sftp, group, hw, extension, uri=None, _open=True):
 
 
 def evaluate_homework(sftp, group, hw, evaluation):
+    '''Se  utilisa para evluar una tarea domiciliaria'''
     sftp.chdir(os.path.join(GROUPS_DIR, group, SUBJECT, HOMEWORKS_DIR))
     _desc = sftp.open('.desc', 'r')
     desc = json.load(_desc)

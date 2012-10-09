@@ -29,7 +29,7 @@ GROUPS = ('1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B')
 
 
 class HomeWorksList(gtk.TreeView):
-
+    '''Lista de arbol con ls tareas domiciliarias'''
     def __init__(self, hwview, notebook, sftp):
         super(HomeWorksList, self).__init__()
 
@@ -107,18 +107,20 @@ class HomeWorksList(gtk.TreeView):
         self._notebook.set_current_page(1)
 
     def _open_homework(self, widget, homework):
+        '''Abre tarea domiciliaria'''
         extension = self._hwlist[homework][-1]
         api.get_homework(self._sftp, self.group, homework, extension,
                          None, True)
 
     def _save_homework(self, widget, homework):
+        '''Guarda la tarea domiciliaria'''
         f = FileChooser()
         api.get_homework(self._sftp, self.group, homework, f.file_path,
                          False)
 
 
 class HomeWorkView(gtk.VBox):
-
+    
     __gsignals__ = {'open': (gobject.SIGNAL_RUN_FIRST, None, [str]),
                     'save': (gobject.SIGNAL_RUN_FIRST, None, [str]),
                     }
@@ -189,6 +191,7 @@ class HomeWorkView(gtk.VBox):
         self.show_all()
 
     def set_data(self, title, comments, evaluation, student, group):
+        '''Devuelve los datos de una tarea domiciliaria'''
         title_markup = '<span font_desc="18"><b>%s</b></span>' % title
         self.title_label.set_markup(title_markup)
         self.desc_label.set_markup('<i>%s</i>' % comments)
@@ -201,6 +204,7 @@ class HomeWorkView(gtk.VBox):
         self.evaluation_t.get_buffer().set_text(text)
 
     def get_evaluation(self):
+        '''Devuelve la evaluacion'''
         number = self.evaluation_n.get_text()
         textbuffer = self.evaluation_t.get_buffer()
         text = textbuffer.get_text(textbuffer.get_start_iter(),
@@ -220,7 +224,7 @@ class HomeWorkView(gtk.VBox):
 
 
 class Entry(gtk.Entry):
-
+    '''Entrada de texto'''
     def __init__(self, text):
         gtk.Entry.__init__(self, max=0)
 
@@ -245,7 +249,7 @@ class Entry(gtk.Entry):
 
 
 class FileChooser(gtk.FileChooserDialog):
-
+    '''Selector de archivos'''
     def __init__(self):
         gtk.FileChooserDialog.__init__(self,
                                        "Guardar archivo",
