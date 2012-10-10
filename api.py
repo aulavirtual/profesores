@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# utils.py by:
+# api.py by:
 #    Agustin Zubiaga <aguz@sugarlabs.org>
 #    Cristhofer Travieso <cristhofert97@gmail.com>
 
@@ -22,45 +22,59 @@ import sys
 import os
 import subprocess
 import tempfile
+import shutil
 import magic
 
 sys.path.insert(0, 'lib')
 
 import paramiko
 import json
+import time
 
 OPEN_COMMAND = 'xdg-open %s' if 'linux' in sys.platform else '%s'
-
-SERVER = '192.168.1.100'
-USERNAME = 'profesores'
+MEDIA_DIR = '/run/media/%s/' % os.getenv('USER')
+SERVER = '192.168.1.2'
+USERNAME = 'aguz'
 RSAKEY = os.path.join(os.getenv('HOME'), '.ssh', 'id_rsa')
 GROUPS_DIR = '/home/servidor/Groups'
 HOMEWORKS_DIR = '.homeworks'
 
 
 def _get_config():
-    '''Devuelve el contenido del archivo config'''
     _file = open('config')
     data = json.load(_file)
     _file.close()
 
-    return data
+    return data if len(data) == 2 else (None, None)
 
 SUBJECT, NAME = _get_config()
 
 
+def save_config(*args):
+    _file = open('config', 'w')
+    json.dump(args, _file)
+    _file.close()
+
+
 def generate_rsa_key():
-    '''Genera la clave ssh'''
-    stdout_file = tempfile.mktemp()
-    p = subprocess.Popen('ssh-keygen',
-                          shell=True,
-                          stdin=subprocess.PIPE,
-                          stdout=open(stdout_file, 'w+b'),
-                          stderr=open(stdout_file, 'r+b'),
-                          universal_newlines=False)
-    for i in range(3):
-        p.stdin.write('')
-        p.stdin.flush()
+    os.system('python keygen.py %s' % RSAKEY)
+
+    ready = False
+    while not ready:
+        try:
+            listdir = os.listdir(MEDIA_DIR)
+            if listdir:
+                pendrive = os.path.join(MEDIA_DIR, listdir[0], 'AulaVirtual')
+                time.sleep(2)
+                if not os.path.exists(pendrive):
+                    os.mkdir(pendrive)
+                key_name = NAME.replace(' ', '_') + '.pub'
+                shutil.copyfile(RSAKEY + '.pub',
+                                os.path.join(pendrive, key_name))
+
+                ready = True
+        except OSError:
+            pass
 
 
 def connect_to_server():
@@ -97,7 +111,6 @@ def save_document(sftp, uri, group, title, description):
 
 
 def get_homeworks(sftp, group):
-    '''Devuelve la lista de las tareeas domiciliarias'''
     sftp.chdir(os.path.join(GROUPS_DIR, group, SUBJECT, HOMEWORKS_DIR))
     _desc = sftp.open('.desc', 'r')
     desc = json.load(_desc)
@@ -110,7 +123,6 @@ def get_homeworks(sftp, group):
 
 
 def get_homework(sftp, group, hw, extension, uri=None, _open=True):
-    '''Devuelve una tarea domiciliaria'''
     sftp.chdir(os.path.join(GROUPS_DIR, group, SUBJECT, HOMEWORKS_DIR))
 
     if not uri:
@@ -118,7 +130,7 @@ def get_homework(sftp, group, hw, extension, uri=None, _open=True):
     else:
         file_path = uri
     if not extension in file_path:
-        file_path += extension
+        file_path += '.' + extension
     sftp.get(hw, file_path)
 
     if _open:
@@ -128,7 +140,6 @@ def get_homework(sftp, group, hw, extension, uri=None, _open=True):
 
 
 def evaluate_homework(sftp, group, hw, evaluation):
-    '''Se  utilisa para evluar una tarea domiciliaria'''
     sftp.chdir(os.path.join(GROUPS_DIR, group, SUBJECT, HOMEWORKS_DIR))
     _desc = sftp.open('.desc', 'r')
     desc = json.load(_desc)

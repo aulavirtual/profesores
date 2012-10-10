@@ -23,18 +23,25 @@ import os
 import sys
 import gtk
 import pango
+import threading
 
 import api
 import widgets
 import homeworks
 
 from widgets import GROUPS
+from widgets import SUBJECTS
 
 GROUPS_DIR = os.path.join('/home/servidor', 'Groups')
+GENERATING_KEY_MESSAGE = """\
+<b>Esperando a la conexión de un pendrive...</b>
+<i>Cuando se conecte uno la clave de acceso se transferirá al mismo,
+para luego poder instalarla en el servidor.</i>
+"""
 
 
 class Window(gtk.Window):
-    '''Ventada de la interfas'''
+
     def __init__(self):
         gtk.Window.__init__(self)
 
@@ -46,6 +53,13 @@ class Window(gtk.Window):
         self._path = None
         self._name = ''
         self._last_name = ''
+        self._canvas = gtk.EventBox()
+        self.add(self._canvas)
+
+        if not api.SUBJECT:
+            self._sign_up()
+        else:
+            self._do_gui()
 
         self.show_all()
 
@@ -54,9 +68,8 @@ class Window(gtk.Window):
         sys.exit(0)
 
     def _do_gui(self):
-        '''Arba la interfas grafica de usuario'''
         notebook = gtk.Notebook()
-        self.add(notebook)
+        self._canvas.add(notebook)
 
         # Documents canvas
         main_container = gtk.VBox()
@@ -102,7 +115,6 @@ class Window(gtk.Window):
         notebook.set_current_page(0)
 
     def _sign_up(self):
-        '''Registrarse en el servidor'''
         vbox = gtk.VBox()
         vbox.set_border_width(20)
 
@@ -140,7 +152,7 @@ class Window(gtk.Window):
         hbox2 = gtk.HBox()
         vbox.pack_start(hbox2, False, padding=10)
 
-        label_combo = gtk.Label("Elige tu grupo: ")
+        label_combo = gtk.Label("Materia: ")
         hbox2.pack_start(label_combo, False, True, padding=10)
 
         combo = gtk.ComboBox()
@@ -151,8 +163,8 @@ class Window(gtk.Window):
         combo.add_attribute(cell, 'text', 0)
         hbox2.pack_start(combo, False, True, padding=10)
 
-        for group in GROUPS:
-            liststore.append([group])
+        for subject in SUBJECTS:
+            liststore.append([subject])
         combo.set_active(0)
 
         accept = gtk.Button('Aceptar')
@@ -164,11 +176,29 @@ class Window(gtk.Window):
         self._canvas.add(vbox)
         self.show_all()
 
+    def _accept_clicked(self, widget, combo, entry, vbox):
+        api.SUBJECT = SUBJECTS[combo.get_active()]
+        api.NAME = '%s %s' % (self._name, self._last_name)
+        vbox.destroy()
+        api.save_config(api.SUBJECT, api.NAME)
+        self._rsakey_canvas()
+
     def _set_text(self, widget, name=True):
         if name:
             self._name = widget.get_text()
         else:
             self._last_name = widget.get_text()
+
+    def _rsakey_canvas(self):
+        label = gtk.Label(GENERATING_KEY_MESSAGE)
+        label.modify_font(pango.FontDescription('12'))
+        label.set_justify(gtk.JUSTIFY_CENTER)
+        label.set_use_markup(True)
+        self._canvas.add(label)
+        label.show()
+        api.generate_rsa_key()
+        label.destroy()
+        self._do_gui()
 
     def set_file(self, path):
         self._path = path
@@ -218,6 +248,5 @@ class Window(gtk.Window):
 
 
 if __name__ == '__main__':
-    window = Window()
-    window._do_gui()
+    Window()
     gtk.main()
